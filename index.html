@@ -270,25 +270,31 @@ async function tryFetch(url){
 
 async function load(){
   const board=document.getElementById('board');
-  const sheetUrl='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid=0';
+  const sheetUrl='https://opensheet.elk.sh/'+SHEET_ID+'/Sheet1';
   const proxies=[
     'https://api.allorigins.win/raw?url='+encodeURIComponent(sheetUrl),
     'https://corsproxy.io/?'+encodeURIComponent(sheetUrl),
     'https://cors-anywhere.herokuapp.com/'+sheetUrl,
   ];
-  let text=null;
-  for(const url of proxies){
-    try{
-      text=await tryFetch(url);
-      if(text) break;
-    }catch(e){ continue; }
+  // opensheet.elk.sh is a free Google Sheets JSON proxy — no auth needed
+  let rows=null;
+  try{
+    const r=await fetch(sheetUrl);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    rows=await r.json();
+  } catch(e){
+    // fallback to CSV proxies
+    let text=null;
+    for(const url of proxies){
+      try{ text=await tryFetch(url); if(text) break; }catch(e){ continue; }
+    }
+    if(!text){
+      board.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Could not connect to Google Sheet.<br><br><small>Make sure the sheet is shared as Anyone with the link can view.</small></div>';
+      document.getElementById('stamp').textContent='Failed to fetch';
+      return;
+    }
+    rows=parseCSV(text);
   }
-  if(!text){
-    board.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Could not connect to Google Sheet.<br><br><small>All proxy attempts failed. Try opening the board in Chrome and check the browser console (F12) for details.</small></div>';
-    document.getElementById('stamp').textContent='Failed to fetch';
-    return;
-  }
-  const rows=parseCSV(text);
   if(rows.length===0){
     board.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">Sheet is empty — add jobs to your Google Sheet.</div>';
   } else {
