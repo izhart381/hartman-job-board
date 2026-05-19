@@ -8,16 +8,15 @@
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 
   :root {
-    --bg:      #f4f2ee;
+    --bg:      #f2f0ec;
     --bg2:     #ffffff;
-    --bg3:     #eceae5;
-    --border:  rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.15);
+    --bg3:     #e8e5e0;
+    --border:  rgba(0,0,0,0.07);
+    --border2: rgba(0,0,0,0.13);
     --text:    #1a1714;
     --muted:   #6b6460;
-    --muted2:  #9b9490;
+    --muted2:  #a09890;
     --accent:  #cc2200;
-    --accent2: #e03010;
     --green:   #16a34a;
     --gdim:    rgba(22,163,74,0.10);
     --yellow:  #d97706;
@@ -33,56 +32,73 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
+  html, body {
+    height: 100%;
     background: var(--bg);
     color: var(--text);
     font-family: var(--fb);
-    min-height: 100vh;
+    overflow: hidden; /* TV kiosk — no scroll on body */
+  }
+
+  /* ── PAGE SHELL ── */
+  .page {
+    height: 100vh;
     display: flex;
     flex-direction: column;
   }
 
-  /* ── HEADER ── */
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 28px; height: 68px;
+  /* ── TOP BAR: logo + clock ── */
+  .topbar {
     background: #fff;
     border-bottom: 3px solid var(--accent);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 64px;
     flex-shrink: 0;
+    z-index: 10;
   }
-  .logo img { height: 48px; display: block; }
-  .header-title {
-    font-family: var(--fh); font-size: 13px; font-weight: 700;
-    letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+  .topbar-logo img {
+    height: 46px;
+    display: block;
   }
-  .header-right { display: flex; align-items: center; gap: 20px; }
+  .topbar-center {
+    font-family: var(--fh);
+    font-size: 13px; font-weight: 800;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .topbar-right {
+    display: flex; align-items: center; gap: 18px;
+  }
   .live-dot {
     display: flex; align-items: center; gap: 6px;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
   }
   .dot {
-    width: 7px; height: 7px; background: var(--green); border-radius: 50%;
-    animation: pulse 2s infinite; box-shadow: 0 0 5px rgba(22,163,74,.5);
+    width: 7px; height: 7px;
+    background: var(--green); border-radius: 50%;
+    animation: blink 2s infinite;
+    box-shadow: 0 0 5px rgba(22,163,74,.5);
   }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
   #clock {
-    font-family: var(--fh); font-size: 22px; font-weight: 700;
-    color: var(--text); letter-spacing: .04em; min-width: 88px; text-align: right;
+    font-family: var(--fh); font-size: 22px; font-weight: 800;
+    color: var(--text); letter-spacing: .03em; min-width: 86px; text-align: right;
   }
 
-  /* ── BODY LAYOUT ── */
-  .body {
+  /* ── SPLIT BODY ── */
+  .split {
     display: flex;
     flex: 1;
     min-height: 0;
-    overflow: hidden;
   }
 
-  /* ── LEFT PANEL — SHOP TRACKER ── */
-  .panel-left {
+  /* ── LEFT COLUMN ── */
+  .col-left {
     flex: 1 1 0;
     min-width: 0;
     display: flex;
@@ -91,634 +107,704 @@
     overflow: hidden;
   }
 
-  .panel-header {
-    padding: 14px 22px 12px;
+  /* Hero: next upcoming job */
+  .hero {
     background: var(--bg2);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid var(--border2);
+    padding: 18px 24px 16px;
+    flex-shrink: 0;
+  }
+  .hero-eyebrow {
+    font-family: var(--fh); font-size: 10px; font-weight: 800;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%;
+  }
+  .hero-main {
+    display: flex; align-items: flex-end;
+    justify-content: space-between; gap: 16px;
+  }
+  .hero-name {
+    font-family: var(--fh); font-size: 48px; font-weight: 900;
+    line-height: 1; letter-spacing: .01em; color: var(--text);
+  }
+  .hero-meta {
+    font-size: 13px; color: var(--muted); margin-top: 5px;
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .hero-meta-item { display: flex; gap: 5px; align-items: center; }
+  .hero-meta-label {
+    font-size: 9px; font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted2);
+  }
+  .hero-meta-val { font-size: 13px; font-weight: 600; color: var(--text); }
+  .hero-right {
+    text-align: right; flex-shrink: 0;
+  }
+  .hero-days-num {
+    font-family: var(--fh); font-size: 56px; font-weight: 900;
+    line-height: 1; color: var(--accent);
+  }
+  .hero-days-num.today { color: var(--green); font-size: 36px; line-height: 1.3; }
+  .hero-days-num.overdue { color: var(--accent); }
+  .hero-days-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); margin-top: 2px;
+  }
+  .hero-badge {
+    font-family: var(--fh); font-size: 10px; font-weight: 800;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 4px;
+    margin-top: 6px; display: inline-block;
+  }
+
+  /* Subheader above job list */
+  .list-subheader {
+    padding: 8px 16px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
     display: flex; align-items: center; justify-content: space-between;
     flex-shrink: 0;
   }
-  .panel-header-title {
-    font-family: var(--fh); font-size: 11px; font-weight: 800;
+  .list-subheader-title {
+    font-family: var(--fh); font-size: 10px; font-weight: 800;
     letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
   }
-  .panel-count {
-    font-family: var(--fh); font-size: 11px; font-weight: 600;
-    color: var(--muted2); letter-spacing: .06em;
+  .list-count {
+    font-size: 10px; font-weight: 600; color: var(--muted2); letter-spacing: .04em;
   }
 
+  /* Scrollable job list */
   .jobs-list {
     flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* Job card */
-  .job-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-left: 4px solid transparent;
-    border-radius: 8px;
-    padding: 14px 16px;
-    transition: box-shadow .15s;
-  }
-  .job-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-
-  .job-card.s-scheduled { border-left-color: var(--blue); }
-  .job-card.s-build     { border-left-color: var(--yellow); }
-  .job-card.s-complete  { border-left-color: var(--green); }
-  .job-card.s-tentative { border-left-color: var(--purple); }
-  .job-card.s-hold      { border-left-color: var(--muted2); }
-
-  .job-row1 {
-    display: flex; align-items: center;
-    justify-content: space-between; gap: 12px;
-    margin-bottom: 8px;
-  }
-  .job-name {
-    font-family: var(--fh); font-size: 20px; font-weight: 800;
-    color: var(--text); line-height: 1; letter-spacing: .01em;
-  }
-
-  .status-badge {
-    font-family: var(--fh); font-size: 10px; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase;
-    padding: 3px 9px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
-  }
-  .sb-scheduled { background: var(--bdim);  color: var(--blue);   border: 1px solid rgba(37,99,235,.25); }
-  .sb-build     { background: var(--ydim);  color: var(--yellow); border: 1px solid rgba(217,119,6,.25); }
-  .sb-complete  { background: var(--gdim);  color: var(--green);  border: 1px solid rgba(22,163,74,.25); }
-  .sb-tentative { background: var(--pdim);  color: var(--purple); border: 1px solid rgba(124,58,237,.25); }
-  .sb-hold      { background: rgba(0,0,0,.04); color: var(--muted); border: 1px solid var(--border2); }
-
-  .job-row2 {
-    display: flex; gap: 20px; flex-wrap: wrap;
-  }
-  .job-meta {
-    display: flex; flex-direction: column; gap: 1px;
-  }
-  .meta-label {
-    font-size: 9px; font-weight: 700; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--muted2);
-  }
-  .meta-value {
-    font-size: 13px; font-weight: 600; color: var(--text);
-  }
-  .meta-value.empty { color: var(--muted2); font-style: italic; font-weight: 400; }
-  .notes-text {
-    font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 6px;
-    padding-top: 6px; border-top: 1px solid var(--border);
-    font-style: italic;
-  }
-
-  /* Date countdown */
-  .date-soon   { color: var(--accent); font-weight: 700; }
-  .date-today  { color: var(--green); font-weight: 700; }
-  .date-past   { color: var(--muted); text-decoration: line-through; }
-
-  /* ── RIGHT PANEL — ASSEMBLY SUMMARY ── */
-  .panel-right {
-    width: 340px;
-    flex-shrink: 0;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  .asm-header {
-    padding: 14px 20px 12px;
-    background: var(--bg2);
+  /* Single-line job row */
+  .job-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 16px;
+    height: 44px;
     border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: space-between;
+    border-left: 4px solid transparent;
+    background: var(--bg2);
+    transition: background .1s;
   }
-  .asm-header-title {
-    font-family: var(--fh); font-size: 11px; font-weight: 800;
+  .job-row:hover { background: #faf8f5; }
+  .job-row:nth-child(even) { background: #fdfcfa; }
+  .job-row:nth-child(even):hover { background: #faf8f5; }
+
+  .job-row.s-scheduled { border-left-color: var(--blue); }
+  .job-row.s-build     { border-left-color: var(--yellow); }
+  .job-row.s-complete  { border-left-color: var(--green); }
+  .job-row.s-tentative { border-left-color: var(--purple); }
+  .job-row.s-hold      { border-left-color: var(--muted2); }
+
+  .jr-name {
+    font-family: var(--fh); font-size: 17px; font-weight: 800;
+    color: var(--text); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 160px; max-width: 220px; flex-shrink: 0;
+  }
+  .jr-divider {
+    color: var(--border2); margin: 0 10px; flex-shrink: 0; user-select: none;
+  }
+  .jr-details {
+    flex: 1; min-width: 0;
+    font-size: 12px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .jr-contractor { font-weight: 600; color: var(--text); }
+  .jr-sep { color: var(--muted2); }
+  .jr-date { font-weight: 500; }
+  .jr-date.soon   { color: var(--accent); font-weight: 700; }
+  .jr-date.today  { color: var(--green); font-weight: 700; }
+  .jr-date.past   { color: var(--muted2); }
+  .jr-note { font-style: italic; color: var(--muted2); overflow: hidden; text-overflow: ellipsis; }
+
+  .jr-badge {
+    font-family: var(--fh); font-size: 9px; font-weight: 800;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 3px;
+    white-space: nowrap; flex-shrink: 0; margin-left: 10px;
+  }
+  .sb-scheduled { background: var(--bdim);  color: var(--blue);   border: 1px solid rgba(37,99,235,.2); }
+  .sb-build     { background: var(--ydim);  color: var(--yellow); border: 1px solid rgba(217,119,6,.2); }
+  .sb-complete  { background: var(--gdim);  color: var(--green);  border: 1px solid rgba(22,163,74,.2); }
+  .sb-tentative { background: var(--pdim);  color: var(--purple); border: 1px solid rgba(124,58,237,.2); }
+  .sb-hold      { background: rgba(0,0,0,.04); color: var(--muted); border: 1px solid var(--border2); }
+
+  /* ── RIGHT COLUMN — ASSEMBLY ── */
+  .col-right {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .asm-panel-header {
+    padding: 10px 16px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border2);
+    flex-shrink: 0;
+    font-family: var(--fh); font-size: 10px; font-weight: 800;
     letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
   }
 
-  .asm-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .asm-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 
-  /* Next ship block */
-  .next-ship-block {
+  /* Next ship card */
+  .ns-card {
     background: var(--bg2);
     border: 1px solid var(--border2);
     border-top: 3px solid var(--accent);
     border-radius: 8px;
-    padding: 16px;
+    padding: 14px 14px 12px;
   }
   .ns-eyebrow {
-    font-family: var(--fh); font-size: 10px; font-weight: 800;
-    letter-spacing: .16em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 8px;
+    font-family: var(--fh); font-size: 9px; font-weight: 800;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px;
   }
   .ns-name {
-    font-family: var(--fh); font-size: 28px; font-weight: 900;
-    line-height: 1; color: var(--text); letter-spacing: .01em;
+    font-family: var(--fh); font-size: 26px; font-weight: 900;
+    line-height: 1; color: var(--text);
   }
-  .ns-run {
-    font-size: 12px; color: var(--muted); margin-top: 2px;
+  .ns-run { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .ns-row {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-top: 10px; gap: 8px;
   }
-  .ns-countdown {
-    display: flex; align-items: baseline; gap: 6px; margin-top: 12px;
-  }
-  .ns-count-num {
-    font-family: var(--fh); font-size: 52px; font-weight: 900;
+  .ns-count {
+    font-family: var(--fh); font-size: 44px; font-weight: 900;
     line-height: 1; color: var(--accent);
   }
-  .ns-count-num.today { color: var(--green); font-size: 32px; line-height: 1.2; }
-  .ns-count-num.overdue { color: var(--accent); }
-  .ns-count-label {
-    font-size: 13px; font-weight: 600; color: var(--muted);
-    text-transform: uppercase; letter-spacing: .06em;
+  .ns-count.today   { color: var(--green); font-size: 26px; line-height: 1.2; }
+  .ns-count.overdue { color: var(--accent); }
+  .ns-count-sub {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); margin-top: 2px;
   }
-  .ns-progress-wrap { margin-top: 12px; }
-  .ns-progress-labels {
+  .ns-prog-wrap { flex: 1; min-width: 0; }
+  .ns-prog-labels {
     display: flex; justify-content: space-between;
-    font-size: 12px; color: var(--muted); margin-bottom: 4px;
+    font-size: 11px; color: var(--muted); margin-bottom: 4px;
   }
-  .ns-progress-labels strong { color: var(--text); }
-  .ns-bar {
-    height: 8px; background: var(--bg3);
-    border-radius: 4px; overflow: hidden;
-  }
-  .ns-bar-fill {
-    height: 100%; border-radius: 4px;
-    background: var(--accent); transition: width .6s ease;
-  }
+  .ns-prog-labels strong { color: var(--text); font-weight: 700; }
+  .ns-bar { height: 7px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+  .ns-bar-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width .5s; }
 
-  /* Stat cards */
+  /* Stat grid */
   .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .stat-card {
     background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 14px 14px;
+    border-radius: 7px; padding: 12px 12px 10px;
   }
   .stat-label {
     font-size: 9px; font-weight: 800; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--muted2); margin-bottom: 4px;
+    text-transform: uppercase; color: var(--muted2); margin-bottom: 3px;
   }
-  .stat-value {
-    font-family: var(--fh); font-size: 34px; font-weight: 900;
+  .stat-val {
+    font-family: var(--fh); font-size: 32px; font-weight: 900;
     line-height: 1; color: var(--text);
   }
-  .stat-value.green { color: var(--green); }
-  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .stat-val.green { color: var(--green); }
+  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
-  /* Assembly job list (mini) */
-  .asm-job-list { display: flex; flex-direction: column; gap: 8px; }
-  .asm-job-row {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-left: 3px solid transparent;
-    border-radius: 7px; padding: 10px 12px;
+  /* Mini asm job list */
+  .asm-section-label {
+    font-family: var(--fh); font-size: 9px; font-weight: 800;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted2); padding: 2px 0;
   }
-  .asm-job-row.complete     { border-left-color: var(--green); }
-  .asm-job-row.in-progress  { border-left-color: var(--yellow); }
-  .asm-job-row.not-started  { border-left-color: var(--muted2); }
-  .asm-job-row.ships-soon   { border-left-color: var(--accent); }
+  .asm-rows { display: flex; flex-direction: column; gap: 6px; }
+  .asm-row {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted2);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .asm-row.complete    { border-left-color: var(--green); }
+  .asm-row.in-progress { border-left-color: var(--yellow); }
+  .asm-row.ships-soon  { border-left-color: var(--accent); }
 
-  .asm-job-name {
-    font-family: var(--fh); font-size: 16px; font-weight: 800;
+  .asm-row-top {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 8px;
+  }
+  .asm-row-name {
+    font-family: var(--fh); font-size: 15px; font-weight: 800;
     color: var(--text); line-height: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .asm-job-run { font-size: 11px; color: var(--muted); margin-top: 1px; }
-
-  .asm-mini-bar {
-    height: 4px; background: var(--bg3);
-    border-radius: 2px; overflow: hidden; margin: 6px 0 4px;
+  .asm-row-run { font-size: 10px; color: var(--muted); }
+  .asm-row-pct {
+    font-family: var(--fh); font-size: 18px; font-weight: 900;
+    color: var(--text); flex-shrink: 0;
   }
-  .asm-mini-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
-  .fill-green  { background: var(--green); }
-  .fill-yellow { background: var(--yellow); }
-  .fill-grey   { background: var(--muted2); }
-  .fill-red    { background: var(--accent); }
-
-  .asm-job-meta {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 11px; color: var(--muted);
+  .asm-mini-bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin: 4px 0 3px; }
+  .asm-mini-fill { height: 100%; border-radius: 2px; }
+  .pf-green  { background: var(--green); }
+  .pf-yellow { background: var(--yellow); }
+  .pf-red    { background: var(--accent); }
+  .pf-grey   { background: var(--muted2); }
+  .asm-row-bottom {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--muted);
   }
-  .asm-job-pct { font-family: var(--fh); font-size: 16px; font-weight: 800; color: var(--text); }
-  .asm-ship-date { font-size: 11px; }
-  .asm-ship-date.urgent { color: var(--accent); font-weight: 700; }
-  .asm-ship-date.today-date { color: var(--green); font-weight: 700; }
+  .asm-ship { font-weight: 500; }
+  .asm-ship.urgent { color: var(--accent); font-weight: 700; }
+  .asm-ship.today-date { color: var(--green); font-weight: 700; }
 
   /* ── FOOTER ── */
   .footer {
-    text-align: center; padding: 10px;
-    font-size: 11px; color: var(--muted2);
+    background: var(--bg2);
     border-top: 1px solid var(--border);
-    background: var(--bg2); flex-shrink: 0;
+    text-align: center; padding: 7px;
+    font-size: 10px; color: var(--muted2);
+    letter-spacing: .05em; flex-shrink: 0;
   }
   #stamp { color: var(--muted); }
 
   /* Loading / error */
   .loading {
-    display: flex; align-items: center; justify-content: center;
-    padding: 60px 20px; font-family: var(--fh); font-size: 16px;
+    display: flex; align-items: center;
+    padding: 30px 20px;
+    font-family: var(--fh); font-size: 14px;
     letter-spacing: .1em; color: var(--muted); text-transform: uppercase;
   }
   .spinner {
-    width: 18px; height: 18px; border: 2px solid var(--bg3);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin .8s linear infinite; margin-right: 12px;
+    width: 16px; height: 16px;
+    border: 2px solid var(--bg3); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin .7s linear infinite; margin-right: 10px; flex-shrink: 0;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .error-msg { padding: 30px 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.8; }
-  .error-msg code { background: var(--bg3); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--accent); }
-
-  .divider-label {
-    font-family: var(--fh); font-size: 10px; font-weight: 800;
-    letter-spacing: .16em; text-transform: uppercase;
-    color: var(--muted2); padding: 4px 0 2px;
-  }
+  .error-note { padding: 16px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .error-note code { background: var(--bg3); padding: 1px 4px; border-radius: 3px; font-size: 11px; color: var(--accent); }
 </style>
 </head>
 <body>
+<div class="page">
 
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">
-    <img src="https://izhart381.github.io/hartman-job-board/hartman-logo.png"
-         alt="Hartman Cabinetry" onerror="this.style.display='none'">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <img src="https://izhart381.github.io/hartman-job-board/hartman-logo.png"
+           alt="Hartman Cabinetry"
+           onerror="this.style.display='none'">
+    </div>
+    <div class="topbar-center">Job &amp; Assembly Board</div>
+    <div class="topbar-right">
+      <div class="live-dot"><span class="dot"></span>Live</div>
+      <div id="clock">--:-- --</div>
+    </div>
   </div>
-  <div class="header-title">Job &amp; Assembly Board</div>
-  <div class="header-right">
-    <div class="live-dot"><span class="dot"></span>Live</div>
-    <div id="clock">--:-- --</div>
+
+  <!-- SPLIT -->
+  <div class="split">
+
+    <!-- LEFT: SHOP TRACKER -->
+    <div class="col-left">
+
+      <!-- Hero: next upcoming job -->
+      <div class="hero" id="hero">
+        <div class="loading"><span class="spinner"></span>Loading…</div>
+      </div>
+
+      <!-- Remaining jobs list -->
+      <div class="list-subheader">
+        <div class="list-subheader-title">All Jobs</div>
+        <div class="list-count" id="job-count">—</div>
+      </div>
+      <div class="jobs-list" id="jobs-list">
+        <div class="loading"><span class="spinner"></span></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: ASSEMBLY SUMMARY -->
+    <div class="col-right">
+      <div class="asm-panel-header">Assembly Summary</div>
+      <div class="asm-body" id="asm-body">
+        <div class="loading"><span class="spinner"></span>Loading…</div>
+      </div>
+    </div>
+
   </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Hartman Cabinetry &nbsp;·&nbsp; <span id="stamp">Refreshes every 5 min</span>
+  </div>
+
 </div>
-
-<!-- BODY -->
-<div class="body">
-
-  <!-- LEFT: SHOP TRACKER -->
-  <div class="panel-left">
-    <div class="panel-header">
-      <div class="panel-header-title">Shop Tracker</div>
-      <div class="panel-count" id="job-count">—</div>
-    </div>
-    <div class="jobs-list" id="jobs-list">
-      <div class="loading"><span class="spinner"></span>Loading jobs…</div>
-    </div>
-  </div>
-
-  <!-- RIGHT: ASSEMBLY SUMMARY -->
-  <div class="panel-right">
-    <div class="asm-header">
-      <div class="asm-header-title">Assembly Summary</div>
-    </div>
-    <div class="asm-body" id="asm-body">
-      <div class="loading"><span class="spinner"></span>Loading…</div>
-    </div>
-  </div>
-
-</div>
-
-<!-- FOOTER -->
-<div class="footer">
-  Hartman Cabinetry &nbsp;·&nbsp; <span id="stamp">Refreshes every 5 minutes</span>
-</div>
-
 <script>
-// ── CONFIG ───────────────────────────────────────────────────────────────────
+// ── CONFIG ────────────────────────────────────────────────────────────────────
 const TRACKER_ID   = '1R2LpMzNtjFM8K5-8w911WOxiB8zWyeST9v5BXFtN-2U';
 const ASSEMBLY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7ILqbViVY6JtDQ6Kz9cYhpjhWat3vPZIofW47wn957KoRwZP-mhHnAuPPFJIDRLF2tLSntrhPpRFg/pub?gid=1899877580&single=true&output=csv';
 const REFRESH      = 5 * 60 * 1000;
 
-// ── CLOCK ────────────────────────────────────────────────────────────────────
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
 function tick() {
-  const n = new Date(), h = n.getHours() % 12 || 12,
-        m = String(n.getMinutes()).padStart(2,'0'),
-        ap = n.getHours() >= 12 ? 'PM' : 'AM';
-  document.getElementById('clock').textContent = h + ':' + m + ' ' + ap;
+  const n=new Date(), h=n.getHours()%12||12,
+        m=String(n.getMinutes()).padStart(2,'0'),
+        ap=n.getHours()>=12?'PM':'AM';
+  document.getElementById('clock').textContent=h+':'+m+' '+ap;
 }
-setInterval(tick, 1000); tick();
+setInterval(tick,1000); tick();
 
-// ── DATE HELPERS ─────────────────────────────────────────────────────────────
-function today0() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function today0(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
 
-function parseDate(s) {
-  if (!s || !s.trim()) return null;
-  const p = s.trim().replace(/-/g,'/').split('/');
-  if (p.length !== 3) return null;
-  let [mo, d, y] = p.map(Number);
-  if (y < 100) y += 2000;
-  const dt = new Date(y, mo-1, d);
-  return isNaN(dt.getTime()) ? null : dt;
-}
-
-function fmtDate(d) {
-  if (!d) return null;
-  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+function parseDate(s){
+  if(!s||!s.trim()) return null;
+  const p=s.trim().replace(/-/g,'/').split('/');
+  if(p.length!==3) return null;
+  let [mo,d,y]=p.map(Number);
+  if(y<100) y+=2000;
+  const dt=new Date(y,mo-1,d);
+  return isNaN(dt.getTime())?null:dt;
 }
 
-function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+function fmtDate(d){
+  if(!d) return null;
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
 
-function esc(s) {
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+
+function esc(s){
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── FETCH TRACKER (opensheet) ─────────────────────────────────────────────────
-async function fetchTracker() {
-  const r = await fetch('https://opensheet.elk.sh/' + TRACKER_ID + '/Sheet1', {cache:'no-store'});
-  if (!r.ok) throw new Error('Tracker HTTP ' + r.status);
+function splitJobName(n){
+  const m=n.match(/^(.*?)\s*[-–]\s*(Run\s*\d+.*)$/i);
+  return m?{client:m[1].trim(),run:m[2].trim()}:{client:n,run:''};
+}
+
+// ── TRACKER FETCH ─────────────────────────────────────────────────────────────
+async function fetchTracker(){
+  const r=await fetch('https://opensheet.elk.sh/'+TRACKER_ID+'/Sheet1',{cache:'no-store'});
+  if(!r.ok) throw new Error('Tracker HTTP '+r.status);
   return r.json();
 }
 
-// ── FETCH ASSEMBLY CSV (with CORS fallback) ───────────────────────────────────
-function splitLine(line) {
-  const vals=[]; let cur='', inQ=false;
-  for (const c of line) {
-    if (c==='"') inQ=!inQ;
-    else if (c===',' && !inQ) { vals.push(cur.trim()); cur=''; }
+// ── ASSEMBLY CSV FETCH + PARSE ────────────────────────────────────────────────
+function splitLine(line){
+  const v=[]; let cur='',inQ=false;
+  for(const c of line){
+    if(c==='"') inQ=!inQ;
+    else if(c===','&&!inQ){v.push(cur.trim());cur='';}
     else cur+=c;
   }
-  vals.push(cur.trim());
-  return vals.map(v=>v.replace(/^"|"$/g,'').trim());
+  v.push(cur.trim());
+  return v.map(x=>x.replace(/^"|"$/g,'').trim());
 }
 
-function parseCSV(text) {
-  const lines = text.trim().split('\n').map(l=>l.replace(/\r/g,''));
-  let hi = -1;
-  for (let i=0; i<Math.min(5,lines.length); i++) {
-    if (/^"?job"?/i.test(lines[i])) { hi=i; break; }
+function parseCSV(text){
+  const lines=text.trim().split('\n').map(l=>l.replace(/\r/g,''));
+  let hi=-1;
+  for(let i=0;i<Math.min(5,lines.length);i++){
+    if(/^"?job"?/i.test(lines[i])){hi=i;break;}
   }
-  if (hi===-1) return [];
-  const hdrs = splitLine(lines[hi]).map(h=>h.toLowerCase());
-  return lines.slice(hi+1).filter(l=>l.trim()).map(l => {
+  if(hi===-1) return [];
+  const hdrs=splitLine(lines[hi]).map(h=>h.toLowerCase());
+  return lines.slice(hi+1).filter(l=>l.trim()).map(l=>{
     const vals=splitLine(l); const row={};
-    hdrs.forEach((h,i) => row[h]=vals[i]||'');
+    hdrs.forEach((h,i)=>row[h]=vals[i]||'');
     return row;
   });
 }
 
-async function fetchAssembly() {
-  const proxies = [
+async function fetchAssembly(){
+  const proxies=[
     ASSEMBLY_CSV,
-    'https://corsproxy.io/?' + encodeURIComponent(ASSEMBLY_CSV),
-    'https://api.allorigins.win/raw?url=' + encodeURIComponent(ASSEMBLY_CSV),
+    'https://corsproxy.io/?'+encodeURIComponent(ASSEMBLY_CSV),
+    'https://api.allorigins.win/raw?url='+encodeURIComponent(ASSEMBLY_CSV),
   ];
-  for (const url of proxies) {
-    try {
-      const r = await fetch(url, {cache:'no-store'});
-      if (!r.ok) continue;
-      const text = await r.text();
-      if (!text || text.trim().startsWith('<!')) continue;
-      return text;
-    } catch(e) { /* try next */ }
+  for(const url of proxies){
+    try{
+      const r=await fetch(url,{cache:'no-store'});
+      if(!r.ok) continue;
+      const t=await r.text();
+      if(!t||t.trim().startsWith('<!')) continue;
+      return t;
+    }catch(e){}
   }
   throw new Error('All CSV fetch attempts failed');
 }
 
-function parseAssembly(text) {
+function parseAssembly(text){
   return parseCSV(text)
-    .filter(r => r['job'] && r['job'].trim())
-    .map(r => {
-      const total = parseInt(r['total cabs']) || 0;
-      const built = parseInt(r['built']) || 0;
-      const pctRaw = (r['% complete']||'').replace('%','').trim();
-      const pct = parseInt(pctRaw) || (total>0 ? Math.round(built/total*100) : 0);
-      return {
-        name:     r['job'].trim(),
-        total, built,
-        remaining: parseInt(r['remaining']) || Math.max(total-built,0),
-        pct,
-        shipDate: parseDate(r['ship date']),
+    .filter(r=>r['job']&&r['job'].trim())
+    .map(r=>{
+      const total=parseInt(r['total cabs'])||0;
+      const built=parseInt(r['built'])||0;
+      const pctRaw=(r['% complete']||'').replace('%','').trim();
+      const pct=parseInt(pctRaw)||(total>0?Math.round(built/total*100):0);
+      return{
+        name:r['job'].trim(), total, built,
+        remaining:parseInt(r['remaining'])||Math.max(total-built,0),
+        pct, shipDate:parseDate(r['ship date']),
       };
     });
 }
 
-// ── STATUS HELPERS ────────────────────────────────────────────────────────────
-function fuzzyStatus(s) {
-  const v = (s||'').toLowerCase().replace(/[^a-z]/g,'');
-  if (/comp|done/.test(v))            return 'complete';
-  if (/build|progress|prod/.test(v))  return 'build';
-  if (/tent/.test(v))                 return 'tentative';
-  if (/hold/.test(v))                 return 'hold';
+// ── STATUS ────────────────────────────────────────────────────────────────────
+function fuzzyStatus(s){
+  const v=(s||'').toLowerCase().replace(/[^a-z]/g,'');
+  if(/comp|done/.test(v))            return 'complete';
+  if(/build|progress|prod/.test(v))  return 'build';
+  if(/tent/.test(v))                 return 'tentative';
+  if(/hold/.test(v))                 return 'hold';
   return 'scheduled';
 }
 
-function statusBadge(status) {
-  const map = {
-    scheduled: ['sb-scheduled','Scheduled'],
-    build:     ['sb-build',    'In Build'],
-    complete:  ['sb-complete', 'Complete'],
-    tentative: ['sb-tentative','Tentative'],
-    hold:      ['sb-hold',     'On Hold'],
-  };
-  return map[status] || ['sb-scheduled','Scheduled'];
-}
+const BADGE={
+  scheduled:['sb-scheduled','Scheduled'],
+  build:    ['sb-build','In Build'],
+  complete: ['sb-complete','Complete'],
+  tentative:['sb-tentative','Tentative'],
+  hold:     ['sb-hold','On Hold'],
+};
 
-function asmStatus(job) {
-  if (job.pct >= 100) return 'complete';
-  if (job.shipDate) {
-    const d = daysBetween(today0(), job.shipDate);
-    if (d <= 3 && d >= 0) return 'ships-soon';
+function asmStatus(job){
+  if(job.pct>=100) return 'complete';
+  if(job.shipDate){
+    const d=daysBetween(today0(),job.shipDate);
+    if(d<=3&&d>=0) return 'ships-soon';
   }
-  return job.built > 0 ? 'in-progress' : 'not-started';
+  return job.built>0?'in-progress':'not-started';
 }
 
-function asmFillClass(status) {
-  if (status==='complete')   return 'fill-green';
-  if (status==='in-progress') return 'fill-yellow';
-  if (status==='ships-soon') return 'fill-red';
-  return 'fill-grey';
+function asmFill(s){
+  if(s==='complete')    return 'pf-green';
+  if(s==='in-progress') return 'pf-yellow';
+  if(s==='ships-soon')  return 'pf-red';
+  return 'pf-grey';
 }
 
-function splitJobName(name) {
-  const m = name.match(/^(.*?)\s*[-–]\s*(Run\s*\d+.*)$/i);
-  return m ? {client:m[1].trim(), run:m[2].trim()} : {client:name, run:''};
-}
+// ── RENDER LEFT ───────────────────────────────────────────────────────────────
+function renderTracker(jobs){
+  const t=today0();
 
-// ── RENDER LEFT: SHOP TRACKER ─────────────────────────────────────────────────
-function renderTracker(jobs) {
-  const t = today0();
-  const visible = jobs.filter(j => {
-    const s = fuzzyStatus(j['Status']);
-    return s !== 'complete'; // hide complete jobs — uncomment to show all:
-    // return true;
+  // Sort: by install date ascending (nulls last), then alphabetical
+  const sorted=[...jobs].sort((a,b)=>{
+    const da=parseDate(a['Install Date']), db=parseDate(b['Install Date']);
+    if(da&&db) return da-db;
+    if(da) return -1;
+    if(db) return 1;
+    return (a['Job Name']||'').localeCompare(b['Job Name']||'');
   });
 
-  document.getElementById('job-count').textContent =
-    visible.length + ' job' + (visible.length!==1?'s':'') + ' active';
+  // Hero = first non-complete job (soonest install date)
+  const active=sorted.filter(j=>fuzzyStatus(j['Status'])!=='complete');
+  const hero=active[0]||sorted[0]||null;
 
-  if (visible.length === 0) {
-    document.getElementById('jobs-list').innerHTML =
-      '<div class="loading" style="color:var(--muted)">No active jobs</div>';
-    return;
+  // ── HERO ──
+  if(!hero){
+    document.getElementById('hero').innerHTML='<div style="padding:16px;color:var(--muted);font-size:13px;">No upcoming jobs</div>';
+  } else {
+    const status=fuzzyStatus(hero['Status']);
+    const [bCls,bTxt]=BADGE[status]||BADGE.scheduled;
+    const contractor=(hero['Contractor']||'').trim();
+    const installDate=parseDate(hero['Install Date']);
+    const notes=(hero['Notes']||'').trim();
+    const days=installDate?daysBetween(t,installDate):null;
+
+    let dayCls='', dayLabel='';
+    if(days===0){dayCls='today';dayLabel='TODAY';}
+    else if(days!==null&&days<0){dayCls='overdue';dayLabel=Math.abs(days);}
+    else if(days!==null){dayCls='';dayLabel=days;}
+
+    document.getElementById('hero').innerHTML=`
+      <div class="hero-eyebrow">Next Up</div>
+      <div class="hero-main">
+        <div>
+          <div class="hero-name">${esc(hero['Job Name']||'—')}</div>
+          <div class="hero-meta">
+            ${contractor?`<div class="hero-meta-item"><span class="hero-meta-label">Contractor</span>&nbsp;<span class="hero-meta-val">${esc(contractor)}</span></div>`:''}
+            ${installDate?`<div class="hero-meta-item"><span class="hero-meta-label">Install</span>&nbsp;<span class="hero-meta-val">${fmtDate(installDate)}</span></div>`:''}
+            ${notes?`<div class="hero-meta-item" style="font-style:italic;color:var(--muted);font-size:12px">${esc(notes)}</div>`:''}
+          </div>
+        </div>
+        <div class="hero-right">
+          ${days!==null?`
+            <div class="hero-days-num ${dayCls}">${dayLabel}</div>
+            <div class="hero-days-label">${days===0?'install today':days<0?'days past':'days away'}</div>
+          `:''}
+          <div><span class="hero-badge ${bCls}" style="margin-top:8px">${bTxt}</span></div>
+        </div>
+      </div>`;
   }
 
-  let h = '';
-  for (const job of visible) {
-    const name       = (job['Job Name']   || '').trim();
-    const contractor = (job['Contractor'] || '').trim();
-    const notes      = (job['Notes']      || '').trim();
-    const status     = fuzzyStatus(job['Status']);
-    const installDate= parseDate(job['Install Date']);
-    const [badgeCls, badgeTxt] = statusBadge(status);
+  // ── JOB LIST (remaining, excluding hero) ──
+  // Show all jobs in list (including hero, so you can see all context); hero just gets highlighted
+  const listJobs=sorted; // all jobs
+  document.getElementById('job-count').textContent=
+    sorted.length+' job'+(sorted.length!==1?'s':'')+' · '+active.length+' active';
 
-    const days = installDate ? daysBetween(t, installDate) : null;
-    let dateCls = '', dateLabel = fmtDate(installDate) || '';
-    if (days !== null) {
-      if (days === 0)       { dateCls = 'date-today';  dateLabel += ' — Today!'; }
-      else if (days < 0)    { dateCls = 'date-past';   dateLabel += ` (${Math.abs(days)}d ago)`; }
-      else if (days <= 7)   { dateCls = 'date-soon';   dateLabel += ` (${days}d)`; }
-    }
+  let h='';
+  for(const job of listJobs){
+    if(job===hero) continue; // skip — already shown in hero
+    const status=fuzzyStatus(job['Status']);
+    const [bCls,bTxt]=BADGE[status]||BADGE.scheduled;
+    const contractor=(job['Contractor']||'').trim();
+    const notes=(job['Notes']||'').trim();
+    const installDate=parseDate(job['Install Date']);
+    const days=installDate?daysBetween(t,installDate):null;
 
-    h += `<div class="job-card s-${status}">
-      <div class="job-row1">
-        <div class="job-name">${esc(name)||'—'}</div>
-        <div class="status-badge ${badgeCls}">${badgeTxt}</div>
-      </div>
-      <div class="job-row2">
-        ${contractor ? `<div class="job-meta">
-          <div class="meta-label">Contractor</div>
-          <div class="meta-value">${esc(contractor)}</div>
-        </div>` : ''}
-        ${installDate ? `<div class="job-meta">
-          <div class="meta-label">Install Date</div>
-          <div class="meta-value ${dateCls}">${dateLabel}</div>
-        </div>` : ''}
-      </div>
-      ${notes ? `<div class="notes-text">${esc(notes)}</div>` : ''}
+    let dateCls='', dateStr=fmtDate(installDate)||'';
+    if(days===0)       {dateCls='today';}
+    else if(days!==null&&days<0)  {dateCls='past';}
+    else if(days!==null&&days<=7) {dateCls='soon';}
+
+    // Build detail string: contractor · date · note
+    const parts=[];
+    if(contractor) parts.push(`<span class="jr-contractor">${esc(contractor)}</span>`);
+    if(dateStr)    parts.push(`<span class="jr-sep">·</span><span class="jr-date ${dateCls}">${dateStr}</span>`);
+    if(notes)      parts.push(`<span class="jr-sep">·</span><span class="jr-note">${esc(notes)}</span>`);
+
+    h+=`<div class="job-row s-${status}">
+      <div class="jr-name">${esc(job['Job Name']||'—')}</div>
+      <span class="jr-divider">|</span>
+      <div class="jr-details">${parts.join(' ')}</div>
+      <span class="jr-badge ${bCls}">${bTxt}</span>
     </div>`;
   }
 
-  document.getElementById('jobs-list').innerHTML = h;
+  document.getElementById('jobs-list').innerHTML = h || '<div style="padding:16px;color:var(--muted);font-size:13px;">All jobs shown above</div>';
 }
 
-// ── RENDER RIGHT: ASSEMBLY SUMMARY ───────────────────────────────────────────
-function renderAssembly(jobs) {
-  const t = today0();
-  if (!jobs || jobs.length === 0) {
-    document.getElementById('asm-body').innerHTML =
-      '<div class="error-msg">No data in Assembly Summary sheet.</div>';
+// ── RENDER RIGHT ──────────────────────────────────────────────────────────────
+function renderAssembly(jobs){
+  const t=today0();
+  if(!jobs||!jobs.length){
+    document.getElementById('asm-body').innerHTML='<div class="error-note">No data in Assembly Summary.</div>';
     return;
   }
 
-  const totalCabs   = jobs.reduce((s,j) => s+j.total, 0);
-  const totalBuilt  = jobs.reduce((s,j) => s+j.built, 0);
-  const overallPct  = totalCabs > 0 ? Math.round(totalBuilt/totalCabs*100) : 0;
-  const completeCount = jobs.filter(j => j.pct >= 100).length;
+  const totalCabs =jobs.reduce((s,j)=>s+j.total,0);
+  const totalBuilt=jobs.reduce((s,j)=>s+j.built,0);
+  const overallPct=totalCabs>0?Math.round(totalBuilt/totalCabs*100):0;
+  const doneCount =jobs.filter(j=>j.pct>=100).length;
 
-  // Next ship = soonest incomplete job with a ship date
-  const nextJob = jobs
-    .filter(j => j.shipDate && j.pct < 100)
-    .sort((a,b) => a.shipDate - b.shipDate)[0] || null;
+  const nextJob=jobs.filter(j=>j.shipDate&&j.pct<100).sort((a,b)=>a.shipDate-b.shipDate)[0]||null;
 
-  let h = '';
+  let h='';
 
-  // ── NEXT SHIP BLOCK ──
-  if (nextJob) {
-    const days = daysBetween(t, nextJob.shipDate);
-    const {client, run} = splitJobName(nextJob.name);
-    h += `<div class="next-ship-block">
+  // Next ship card
+  if(nextJob){
+    const days=daysBetween(t,nextJob.shipDate);
+    const{client,run}=splitJobName(nextJob.name);
+    h+=`<div class="ns-card">
       <div class="ns-eyebrow">▲ Next to Ship</div>
       <div class="ns-name">${esc(client)}</div>
-      ${run ? `<div class="ns-run">${esc(run)}</div>` : ''}
-      <div class="ns-countdown">
-        ${days === 0
-          ? `<div class="ns-count-num today">TODAY</div>`
-          : days < 0
-            ? `<div class="ns-count-num overdue">${Math.abs(days)}</div>
-               <div class="ns-count-label">days<br>overdue</div>`
-            : `<div class="ns-count-num">${days}</div>
-               <div class="ns-count-label">days<br>away</div>`}
-      </div>
-      <div class="ns-progress-wrap">
-        <div class="ns-progress-labels">
-          <span>${nextJob.built} of ${nextJob.total} cabs built</span>
-          <strong>${nextJob.pct}%</strong>
+      ${run?`<div class="ns-run">${esc(run)}</div>`:''}
+      <div class="ns-row">
+        <div>
+          <div class="ns-count ${days===0?'today':days<0?'overdue':''}">${days===0?'TODAY':Math.abs(days)}</div>
+          <div class="ns-count-sub">${days===0?'ships today':days<0?'days overdue':'days away'}</div>
         </div>
-        <div class="ns-bar">
-          <div class="ns-bar-fill" style="width:${nextJob.pct}%"></div>
+        <div class="ns-prog-wrap">
+          <div class="ns-prog-labels">
+            <span>${nextJob.built}/${nextJob.total} cabs</span>
+            <strong>${nextJob.pct}%</strong>
+          </div>
+          <div class="ns-bar"><div class="ns-bar-fill" style="width:${nextJob.pct}%"></div></div>
         </div>
       </div>
     </div>`;
   }
 
-  // ── STAT GRID ──
-  h += `<div class="stat-grid">
+  // Stats
+  h+=`<div class="stat-grid">
     <div class="stat-card">
       <div class="stat-label">Total Cabs</div>
-      <div class="stat-value">${totalCabs}</div>
+      <div class="stat-val">${totalCabs}</div>
       <div class="stat-sub">${totalBuilt} built</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Progress</div>
-      <div class="stat-value">${overallPct}<span style="font-size:18px;color:var(--muted)">%</span></div>
+      <div class="stat-val">${overallPct}<span style="font-size:16px;color:var(--muted)">%</span></div>
       <div class="stat-sub">overall</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Jobs</div>
-      <div class="stat-value">${jobs.length}</div>
-      <div class="stat-sub">on assembly</div>
+      <div class="stat-val">${jobs.length}</div>
+      <div class="stat-sub">in assembly</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Complete</div>
-      <div class="stat-value green">${completeCount}</div>
-      <div class="stat-sub">of ${jobs.length} jobs</div>
+      <div class="stat-val green">${doneCount}</div>
+      <div class="stat-sub">of ${jobs.length}</div>
     </div>
   </div>`;
 
-  // ── MINI JOB LIST ──
-  h += `<div class="divider-label">All Assembly Jobs</div>`;
-  h += `<div class="asm-job-list">`;
-  for (const job of jobs) {
-    const status = asmStatus(job);
-    const {client, run} = splitJobName(job.name);
-    const days = job.shipDate ? daysBetween(t, job.shipDate) : null;
-    let sdCls = '', sdTxt = fmtDate(job.shipDate) || '';
-    if (days !== null) {
-      if (days === 0)      { sdCls = 'today-date'; sdTxt = 'Today!'; }
-      else if (days < 0)   { sdCls = 'urgent'; sdTxt = `${Math.abs(days)}d overdue`; }
-      else if (days <= 5)  { sdCls = 'urgent'; sdTxt += ` (${days}d)`; }
-    }
+  // Mini job rows
+  h+=`<div class="asm-section-label">All Assembly Jobs</div>`;
+  h+=`<div class="asm-rows">`;
+  for(const job of jobs){
+    const st=asmStatus(job);
+    const{client,run}=splitJobName(job.name);
+    const days=job.shipDate?daysBetween(t,job.shipDate):null;
+    let sdCls='',sdTxt=fmtDate(job.shipDate)||'';
+    if(days===0)          {sdCls='today-date';sdTxt='Today!';}
+    else if(days!==null&&days<0) {sdCls='urgent';sdTxt=Math.abs(days)+'d overdue';}
+    else if(days!==null&&days<=5){sdCls='urgent';sdTxt+=` (${days}d)`;}
 
-    h += `<div class="asm-job-row ${status}">
-      <div class="asm-job-name">${esc(client)}</div>
-      ${run ? `<div class="asm-job-run">${esc(run)}</div>` : ''}
+    h+=`<div class="asm-row ${st}">
+      <div class="asm-row-top">
+        <div>
+          <div class="asm-row-name">${esc(client)}</div>
+          ${run?`<div class="asm-row-run">${esc(run)}</div>`:''}
+        </div>
+        <div class="asm-row-pct">${job.pct}%</div>
+      </div>
       <div class="asm-mini-bar">
-        <div class="asm-mini-fill ${asmFillClass(status)}" style="width:${job.pct}%"></div>
+        <div class="asm-mini-fill ${asmFill(st)}" style="width:${job.pct}%"></div>
       </div>
-      <div class="asm-job-meta">
+      <div class="asm-row-bottom">
         <span>${job.built}/${job.total} cabs</span>
-        <span class="asm-job-pct">${job.pct}%</span>
+        ${sdTxt?`<span class="asm-ship ${sdCls}">${sdTxt}</span>`:''}
       </div>
-      ${sdTxt ? `<div class="asm-ship-date ${sdCls}" style="font-size:11px;margin-top:3px;color:var(--muted)">${sdTxt}</div>` : ''}
     </div>`;
   }
-  h += '</div>';
+  h+=`</div>`;
 
-  document.getElementById('asm-body').innerHTML = h;
+  document.getElementById('asm-body').innerHTML=h;
 }
 
-// ── LOAD ─────────────────────────────────────────────────────────────────────
-async function load() {
-  // Fetch both sources in parallel; each renders independently
-  const trackerPromise = fetchTracker()
-    .then(jobs => renderTracker(jobs))
-    .catch(e => {
-      document.getElementById('jobs-list').innerHTML =
-        `<div class="error-msg">Could not load tracker.<br><code>${esc(e.message)}</code></div>`;
+// ── LOAD ──────────────────────────────────────────────────────────────────────
+async function load(){
+  fetchTracker()
+    .then(j=>renderTracker(j))
+    .catch(e=>{
+      document.getElementById('hero').innerHTML=`<div class="error-note">Tracker failed: <code>${esc(e.message)}</code></div>`;
+      document.getElementById('jobs-list').innerHTML='';
     });
 
-  const asmPromise = fetchAssembly()
-    .then(text => {
-      const jobs = parseAssembly(text);
-      renderAssembly(jobs);
-    })
-    .catch(e => {
-      document.getElementById('asm-body').innerHTML =
-        `<div class="error-msg">Could not load assembly data.<br><code>${esc(e.message)}</code></div>`;
+  fetchAssembly()
+    .then(t=>renderAssembly(parseAssembly(t)))
+    .catch(e=>{
+      document.getElementById('asm-body').innerHTML=`<div class="error-note">Assembly failed: <code>${esc(e.message)}</code></div>`;
     });
 
-  await Promise.allSettled([trackerPromise, asmPromise]);
-  document.getElementById('stamp').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  document.getElementById('stamp').textContent='Updated '+new Date().toLocaleTimeString();
 }
 
 load();
