@@ -60,14 +60,12 @@
   .jdate{font-family:var(--fh);font-size:15px;font-weight:600;color:var(--text);white-space:nowrap}
 
   .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px;text-align:center;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
-  .s-sch{background:rgba(26,77,138,.08);color:var(--blue);border:1px solid rgba(26,77,138,.18)}
-  .s-rdy{background:rgba(26,140,60,.1);color:#1a7a32;border:1px solid rgba(26,140,60,.25)}
-  .s-bld{background:rgba(204,34,0,.08);color:var(--accent);border:1px solid rgba(204,34,0,.18)}
-  .s-ten{background:rgba(90,58,138,.08);color:var(--purple);border:1px solid rgba(90,58,138,.18)}
-  .s-cmp{background:rgba(26,110,46,.08);color:var(--green);border:1px solid rgba(26,110,46,.18)}
-  .s-hld{background:rgba(0,0,0,.06);color:var(--muted);border:1px solid var(--border2)}
-  .s-rtc{background:rgba(255,140,0,.1);color:#b36000;border:1px solid rgba(255,140,0,.25)}
-  .s-wait{background:rgba(148,0,211,.08);color:#6a0dad;border:1px solid rgba(148,0,211,.2)}
+  .s-sch{background:rgba(26,90,200,.12);color:#1a4db8;border:1px solid rgba(26,90,200,.3)}
+  .s-rtc{background:rgba(30,160,60,.12);color:#1a7a30;border:1px solid rgba(30,160,60,.3)}
+  .s-bld{background:rgba(230,100,0,.12);color:#b35000;border:1px solid rgba(230,100,0,.3)}
+  .s-wait{background:rgba(120,0,200,.12);color:#6600bb;border:1px solid rgba(120,0,200,.3)}
+  .s-ten{background:rgba(0,0,0,.06);color:#666;border:1px solid rgba(0,0,0,.15)}
+  .s-cmp{background:rgba(30,160,60,.12);color:#1a7a30;border:1px solid rgba(30,160,60,.3)}
   .s-unk{background:rgba(0,0,0,.05);color:#666;border:1px solid rgba(0,0,0,.15)}
 
   .build-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:16px 20px}
@@ -143,7 +141,16 @@ function fuzzyStatus(s){
 }
 
 function sClass(s){
-  return {'scheduled':'s-sch','ready':'s-rdy','in build':'s-bld','tentative':'s-ten','complete':'s-cmp','on hold':'s-hld'}[fuzzyStatus(s)]||'s-sch';
+  const map={
+    'scheduled':             's-sch',
+    'ready to cut':          's-rtc',
+    'in progress':           's-bld',
+    'waiting for approvals': 's-wait',
+    'tentative':             's-ten',
+    'complete':              's-cmp'
+  };
+  return map[fuzzyStatus(s)]||'s-unk';
+}[fuzzyStatus(s)]||'s-sch';
 }
 
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
