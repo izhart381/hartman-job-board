@@ -150,7 +150,6 @@ function sClass(s){
     'complete':              's-cmp'
   };
   return map[fuzzyStatus(s)]||'s-unk';
-}[fuzzyStatus(s)]||'s-sch';
 }
 
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
