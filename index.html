@@ -61,10 +61,13 @@
 
   .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px;text-align:center;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
   .s-sch{background:rgba(26,77,138,.08);color:var(--blue);border:1px solid rgba(26,77,138,.18)}
+  .s-rdy{background:rgba(26,140,60,.1);color:#1a7a32;border:1px solid rgba(26,140,60,.25)}
   .s-bld{background:rgba(204,34,0,.08);color:var(--accent);border:1px solid rgba(204,34,0,.18)}
   .s-ten{background:rgba(90,58,138,.08);color:var(--purple);border:1px solid rgba(90,58,138,.18)}
   .s-cmp{background:rgba(26,110,46,.08);color:var(--green);border:1px solid rgba(26,110,46,.18)}
   .s-hld{background:rgba(0,0,0,.06);color:var(--muted);border:1px solid var(--border2)}
+  .s-rtc{background:rgba(255,140,0,.1);color:#b36000;border:1px solid rgba(255,140,0,.25)}
+  .s-wait{background:rgba(148,0,211,.08);color:#6a0dad;border:1px solid rgba(148,0,211,.2)}
 
   .build-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:16px 20px}
   .bcard{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px 16px;border-left:3px solid var(--accent)}
@@ -131,14 +134,15 @@ setInterval(tick,1000); tick();
 function fuzzyStatus(s){
   const v=(s||'').toLowerCase().replace(/[^a-z]/g,'');
   if(/comp|done|finish/.test(v)) return 'complete';
-  if(/hold|pause|wait|stop/.test(v)) return 'on hold';
-  if(/build|progress|production|prod|shop|cut|assembl/.test(v)) return 'in build';
-  if(/tent|maybe|pend|potential|tbd|unsure/.test(v)) return 'tentative';
+  if(/approv|approval|wait/.test(v)) return 'waiting for approvals';
+  if(/readytocut|readycut|ready/.test(v)) return 'ready to cut';
+  if(/progress|build|production|prod|assembl/.test(v)) return 'in progress';
+  if(/tent|maybe|pend|tbd|hold|pause|stop/.test(v)) return 'tentative';
   return 'scheduled';
 }
 
 function sClass(s){
-  return {'scheduled':'s-sch','in build':'s-bld','tentative':'s-ten','complete':'s-cmp','on hold':'s-hld'}[fuzzyStatus(s)]||'s-sch';
+  return {'scheduled':'s-sch','ready':'s-rdy','in build':'s-bld','tentative':'s-ten','complete':'s-cmp','on hold':'s-hld'}[fuzzyStatus(s)]||'s-sch';
 }
 
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
@@ -146,8 +150,17 @@ function daysBetween(a,b){ return Math.round((b-a)/86400000); }
 function parseDate(s){
   if(!s||!s.trim()) return null;
   let ds=s.trim();
-  const slashes=(ds.match(/\//g)||[]).length;
-  if(slashes===1) ds=ds+'/'+new Date().getFullYear();
+  // normalize dashes to slashes: 6-30-26 -> 6/30/26
+  ds=ds.replace(/-/g,'/');
+  const parts=ds.split('/');
+  if(parts.length===2){
+    // 7/24 -> 7/24/currentyear
+    ds=parts[0]+'/'+parts[1]+'/'+new Date().getFullYear();
+  } else if(parts.length===3){
+    // fix 2-digit year: 6/25/25 -> 6/25/2025
+    if(parts[2].length===2) parts[2]='20'+parts[2];
+    ds=parts.join('/');
+  }
   const d=new Date(ds);
   return isNaN(d)?null:d;
 }
@@ -176,17 +189,18 @@ function parseCSV(text){
 function render(raw){
   const today=new Date(); today.setHours(0,0,0,0);
 
+  function col(r,...keys){ for(const k of keys){ if(r[k]&&r[k].trim()) return r[k].trim(); } return ''; }
   const jobs=raw.map(r=>({
-    name: r['Job Name']||'',
-    contractor: r['Contractor']||'',
-    installDate: parseDate(r['Install Date']),
-    status: (r['Status']||'scheduled').trim(),
-    notes: r['Notes']||''
+    name: col(r,'Job Name','Job','Name','job name','job'),
+    contractor: col(r,'Contractor','Builder','Company','contractor'),
+    installDate: parseDate(col(r,'Install Date','Install','Date','install date','Install date','install','date')),
+    status: col(r,'Status','Job Status','Stage','status','job status')||'scheduled',
+    notes: col(r,'Notes','Note','Comments','notes','comment'),
   }));
 
-  const active   = jobs.filter(j=>{ const f=fuzzyStatus(j.status); return f!=='complete'&&f!=='on hold'; });
-  const inBuild  = active.filter(j=>fuzzyStatus(j.status)==='in build').sort((a,b)=>(a.installDate||new Date(9e15))-(b.installDate||new Date(9e15)));
-  const scheduled= active.filter(j=>{ const f=fuzzyStatus(j.status); return f!=='in build'&&f!=='tentative'; }).sort((a,b)=>(a.installDate||new Date(9e15))-(b.installDate||new Date(9e15)));
+  const active   = jobs.filter(j=>{ const f=fuzzyStatus(j.status); return f!=='complete'; });
+  const inBuild  = active.filter(j=>['in progress','ready to cut'].includes(fuzzyStatus(j.status))).sort((a,b)=>(a.installDate||new Date(9e15))-(b.installDate||new Date(9e15)));
+  const scheduled= active.filter(j=>{ const f=fuzzyStatus(j.status); return !['in progress','ready to cut'].includes(f); }).sort((a,b)=>(a.installDate||new Date(9e15))-(b.installDate||new Date(9e15)));
 
   const next    = scheduled[0]||null;
   const upcoming= scheduled.slice(1,13);
