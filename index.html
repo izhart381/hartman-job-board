@@ -260,25 +260,41 @@ function demo(){
   ]);
 }
 
+async function tryFetch(url){
+  const r=await fetch(url);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const text=await r.text();
+  if(!text||text.length<10||text.includes('<!DOCTYPE')||text.includes('Sign in')) throw new Error('bad response');
+  return text;
+}
+
 async function load(){
   const board=document.getElementById('board');
-  try{
-    const url='https://corsproxy.io/?'+encodeURIComponent('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid=0');
-    const r=await fetch(url);
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const text=await r.text();
-    if(!text||text.includes('<!DOCTYPE')||text.includes('Sign in')) throw new Error('Sheet not public');
-    const rows=parseCSV(text);
-    if(rows.length===0){
-      board.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">Sheet is empty — add jobs to your Google Sheet to see them here.</div>';
-    } else {
-      render(rows);
-    }
-    document.getElementById('stamp').textContent='Updated '+new Date().toLocaleTimeString();
-  } catch(e){
-    board.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">Could not load sheet: '+e.message+'<br><br><small>Make sure the sheet is published: File → Share → Publish to web → Sheet1 → CSV</small></div>';
-    document.getElementById('stamp').textContent='Error: '+e.message;
+  const sheetUrl='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid=0';
+  const proxies=[
+    'https://api.allorigins.win/raw?url='+encodeURIComponent(sheetUrl),
+    'https://corsproxy.io/?'+encodeURIComponent(sheetUrl),
+    'https://cors-anywhere.herokuapp.com/'+sheetUrl,
+  ];
+  let text=null;
+  for(const url of proxies){
+    try{
+      text=await tryFetch(url);
+      if(text) break;
+    }catch(e){ continue; }
   }
+  if(!text){
+    board.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Could not connect to Google Sheet.<br><br><small>All proxy attempts failed. Try opening the board in Chrome and check the browser console (F12) for details.</small></div>';
+    document.getElementById('stamp').textContent='Failed to fetch';
+    return;
+  }
+  const rows=parseCSV(text);
+  if(rows.length===0){
+    board.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">Sheet is empty — add jobs to your Google Sheet.</div>';
+  } else {
+    render(rows);
+  }
+  document.getElementById('stamp').textContent='Updated '+new Date().toLocaleTimeString();
 }
 
 load(); setInterval(load, REFRESH);
