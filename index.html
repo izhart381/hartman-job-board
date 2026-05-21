@@ -807,7 +807,7 @@ function renderTracker(jobs){
     else if(days!==null&&days<0)  {dateCls='past';}
     else if(days!==null&&days<=7) {dateCls='soon';}
 
-    // Build detail string: contractor · date · note
+    // Build detail string: contractor · date · status · note
     const parts=[];
     if(contractor) parts.push(`<span class="jr-contractor">${esc(contractor)}</span>`);
     if(dateStr)    parts.push(`<span class="jr-sep">·</span><span class="jr-date ${dateCls}">${dateStr}</span>`);
@@ -816,8 +816,8 @@ function renderTracker(jobs){
     h+=`<div class="job-row s-${status}">
       <div class="jr-name">${esc(job['Job Name']||'—')}</div>
       <span class="jr-divider">|</span>
+      <span class="jr-badge ${bCls}" style="margin-left:0;margin-right:10px;flex-shrink:0">${bTxt}</span>
       <div class="jr-details">${parts.join(' ')}</div>
-      <span class="jr-badge ${bCls}">${bTxt}</span>
     </div>`;
   }
 
