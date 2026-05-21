@@ -49,26 +49,26 @@
 
   /* ── TOP BAR: logo + clock ── */
   .topbar {
-    background: #fff;
+    background: #111110;
     border-bottom: 3px solid var(--accent);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    height: 64px;
+    height: 68px;
     flex-shrink: 0;
     z-index: 10;
   }
   .topbar-logo img {
-    height: 46px;
+    height: 50px;
     display: block;
+    filter: brightness(0) invert(1);
   }
   .topbar-center {
     font-family: var(--fh);
     font-size: 13px; font-weight: 800;
     letter-spacing: .2em; text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.45);
   }
   .topbar-right {
     display: flex; align-items: center; gap: 18px;
@@ -76,18 +76,18 @@
   .live-dot {
     display: flex; align-items: center; gap: 6px;
     font-size: 10px; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,0.45);
   }
   .dot {
     width: 7px; height: 7px;
     background: var(--green); border-radius: 50%;
     animation: blink 2s infinite;
-    box-shadow: 0 0 5px rgba(22,163,74,.5);
+    box-shadow: 0 0 5px rgba(22,163,74,.7);
   }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
   #clock {
     font-family: var(--fh); font-size: 22px; font-weight: 800;
-    color: var(--text); letter-spacing: .03em; min-width: 86px; text-align: right;
+    color: #fff; letter-spacing: .03em; min-width: 86px; text-align: right;
   }
 
   /* ── SPLIT BODY ── */
@@ -307,22 +307,7 @@
   .ns-bar { height: 7px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
   .ns-bar-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width .5s; }
 
-  /* Stat grid */
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .stat-card {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 7px; padding: 12px 12px 10px;
-  }
-  .stat-label {
-    font-size: 9px; font-weight: 800; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--muted2); margin-bottom: 3px;
-  }
-  .stat-val {
-    font-family: var(--fh); font-size: 32px; font-weight: 900;
-    line-height: 1; color: var(--text);
-  }
-  .stat-val.green { color: var(--green); }
-  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
 
   /* Mini asm job list */
   .asm-section-label {
@@ -567,11 +552,18 @@ function parseAssembly(text){
 // ── STATUS ────────────────────────────────────────────────────────────────────
 function fuzzyStatus(s){
   const v=(s||'').toLowerCase().replace(/[^a-z]/g,'');
-  if(/comp|done/.test(v))            return 'complete';
-  if(/build|progress|prod/.test(v))  return 'build';
-  if(/tent/.test(v))                 return 'tentative';
-  if(/hold/.test(v))                 return 'hold';
-  return 'scheduled';
+  // Complete / done
+  if(/comp|done|finish|delivr/.test(v))         return 'complete';
+  // In Build / In Progress / Production / Cutting / Assembly
+  if(/build|progress|prod|cut|assembl|active|inprog/.test(v)) return 'build';
+  // Tentative / Pending / Waiting / Quote
+  if(/tent|pend|wait|quot/.test(v))             return 'tentative';
+  // On Hold / Paused / Delayed / Cancelled
+  if(/hold|paus|delay|cancel/.test(v))          return 'hold';
+  // Scheduled / Confirmed / Approved / Upcoming
+  if(/sched|confirm|approv|upcom/.test(v))      return 'scheduled';
+  // Fallback: if there's any text at all, show as scheduled
+  return v.length>0 ? 'scheduled' : 'scheduled';
 }
 
 const BADGE={
@@ -698,11 +690,6 @@ function renderAssembly(jobs){
     return;
   }
 
-  const totalCabs =jobs.reduce((s,j)=>s+j.total,0);
-  const totalBuilt=jobs.reduce((s,j)=>s+j.built,0);
-  const overallPct=totalCabs>0?Math.round(totalBuilt/totalCabs*100):0;
-  const doneCount =jobs.filter(j=>j.pct>=100).length;
-
   const nextJob=jobs.filter(j=>j.shipDate&&j.pct<100).sort((a,b)=>a.shipDate-b.shipDate)[0]||null;
 
   let h='';
@@ -731,29 +718,7 @@ function renderAssembly(jobs){
     </div>`;
   }
 
-  // Stats
-  h+=`<div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-label">Total Cabs</div>
-      <div class="stat-val">${totalCabs}</div>
-      <div class="stat-sub">${totalBuilt} built</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Progress</div>
-      <div class="stat-val">${overallPct}<span style="font-size:16px;color:var(--muted)">%</span></div>
-      <div class="stat-sub">overall</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Jobs</div>
-      <div class="stat-val">${jobs.length}</div>
-      <div class="stat-sub">in assembly</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Complete</div>
-      <div class="stat-val green">${doneCount}</div>
-      <div class="stat-sub">of ${jobs.length}</div>
-    </div>
-  </div>`;
+
 
   // Mini job rows
   h+=`<div class="asm-section-label">All Assembly Jobs</div>`;
