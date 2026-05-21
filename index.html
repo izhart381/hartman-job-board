@@ -241,12 +241,45 @@
     padding: 2px 8px; border-radius: 3px;
     white-space: nowrap; flex-shrink: 0; margin-left: 10px;
   }
-  .sb-scheduled { background: var(--bdim);  color: var(--blue);   border: 1px solid rgba(37,99,235,.2); }
-  .sb-build     { background: var(--ydim);  color: var(--yellow); border: 1px solid rgba(217,119,6,.2); }
-  .sb-complete  { background: var(--gdim);  color: var(--green);  border: 1px solid rgba(22,163,74,.2); }
-  .sb-tentative { background: var(--pdim);  color: var(--purple); border: 1px solid rgba(124,58,237,.2); }
-  .sb-hold      { background: rgba(0,0,0,.04); color: var(--muted); border: 1px solid var(--border2); }
-  .sb-rtc       { background: var(--odim);  color: var(--orange); border: 1px solid rgba(234,88,12,.2); }
+  /* Badge + border colors injected dynamically — see applyStatusColors() */
+
+  /* ── SETTINGS PANEL ── */
+  .settings-btn {
+    position: fixed; bottom: 36px; right: 328px; z-index: 200;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #111110; border: 2px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.65); font-size: 15px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: background .15s;
+  }
+  .settings-btn:hover { background: #333; color: #fff; }
+  .settings-drawer {
+    position: fixed; bottom: 78px; right: 328px; z-index: 200;
+    background: #fff; border: 1px solid var(--border2);
+    border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    padding: 16px 18px; width: 290px;
+    display: none; flex-direction: column; gap: 9px;
+  }
+  .settings-drawer.open { display: flex; }
+  .settings-title {
+    font-family: var(--fh); font-size: 11px; font-weight: 800;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+    padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 2px;
+  }
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .setting-label {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .setting-swatches { display: flex; gap: 5px; }
+  .swatch {
+    width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent; transition: transform .1s, border-color .1s; flex-shrink: 0;
+  }
+  .swatch:hover { transform: scale(1.15); }
+  .swatch.active { border-color: #111; box-shadow: 0 0 0 1px #fff inset; }
 
   /* ── RIGHT COLUMN — ASSEMBLY ── */
   .col-right {
@@ -442,6 +475,13 @@
   </div>
 
 </div>
+<!-- SETTINGS BUTTON + DRAWER -->
+<button class="settings-btn" id="settings-btn" title="Status colors">⚙</button>
+<div class="settings-drawer" id="settings-drawer">
+  <div class="settings-title">Status Colors</div>
+  <div id="settings-rows"></div>
+</div>
+
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const TRACKER_ID   = '1R2LpMzNtjFM8K5-8w911WOxiB8zWyeST9v5BXFtN-2U';
@@ -555,9 +595,36 @@ function parseAssembly(text){
 }
 
 // ── STATUS ────────────────────────────────────────────────────────────────────
-// Returns a CSS color-class based on the status value, but the label always
-// shows whatever is literally in the sheet dropdown.
-function fuzzyStatus(s){
+// ── STATUS COLOR SYSTEM ──────────────────────────────────────────────────────
+// Each status key maps to a color palette option.
+// Colors: green, yellow, blue, orange, purple, red, gray
+const COLOR_PALETTES = {
+  green:  { bg:'rgba(22,163,74,0.12)',  text:'#16a34a', border:'rgba(22,163,74,0.3)',  bar:'#16a34a' },
+  yellow: { bg:'rgba(217,119,6,0.12)',  text:'#d97706', border:'rgba(217,119,6,0.3)',  bar:'#d97706' },
+  blue:   { bg:'rgba(37,99,235,0.12)',  text:'#2563eb', border:'rgba(37,99,235,0.3)',  bar:'#2563eb' },
+  orange: { bg:'rgba(234,88,12,0.12)',  text:'#ea580c', border:'rgba(234,88,12,0.3)',  bar:'#ea580c' },
+  purple: { bg:'rgba(124,58,237,0.12)', text:'#7c3aed', border:'rgba(124,58,237,0.3)', bar:'#7c3aed' },
+  red:    { bg:'rgba(204,34,0,0.12)',   text:'#cc2200', border:'rgba(204,34,0,0.3)',   bar:'#cc2200' },
+  gray:   { bg:'rgba(0,0,0,0.05)',      text:'#6b6460', border:'rgba(0,0,0,0.15)',     bar:'#a09890' },
+};
+
+const SWATCH_HEX = {
+  green:'#16a34a', yellow:'#d97706', blue:'#2563eb',
+  orange:'#ea580c', purple:'#7c3aed', red:'#cc2200', gray:'#9b9490',
+};
+
+// Default color per status key
+const STATUS_DEFAULTS = {
+  scheduled: 'blue',
+  build:     'yellow',
+  rtc:       'green',
+  complete:  'green',
+  tentative: 'purple',
+  hold:      'gray',
+};
+
+// Which fuzzy bucket each raw status maps to (used for border + badge class)
+function fuzzyBucket(s){
   const v=(s||'').toLowerCase().replace(/[^a-z]/g,'');
   if(/comp|done|finish|delivr/.test(v))               return 'complete';
   if(/readytocut|readycut|rtc|ready/.test(v))         return 'rtc';
@@ -567,21 +634,85 @@ function fuzzyStatus(s){
   return 'scheduled';
 }
 
-// Badge class only — label comes straight from the sheet
-const BADGE_CLASS={
-  scheduled:'sb-scheduled',
-  build:    'sb-build',
-  complete: 'sb-complete',
-  tentative:'sb-tentative',
-  hold:     'sb-hold',
-  rtc:      'sb-rtc',
-};
+// Load saved color prefs from localStorage, fall back to defaults
+let statusColors = {...STATUS_DEFAULTS};
+try {
+  const saved = JSON.parse(localStorage.getItem('hc_status_colors')||'{}');
+  Object.assign(statusColors, saved);
+} catch(e){}
 
-// Returns [cssClass, labelText] — label is raw sheet value
-function statusBadge(rawStatus){
-  const cls = BADGE_CLASS[fuzzyStatus(rawStatus)] || 'sb-scheduled';
-  return [cls, rawStatus || 'Scheduled'];
+function saveColors(){ localStorage.setItem('hc_status_colors', JSON.stringify(statusColors)); }
+
+// Inject a <style> tag with all badge + border rules
+function applyStatusColors(){
+  let css = '';
+  for(const [key, colorName] of Object.entries(statusColors)){
+    const p = COLOR_PALETTES[colorName] || COLOR_PALETTES.blue;
+    css += `.sb-${key}{ background:${p.bg}; color:${p.text}; border:1px solid ${p.border}; }\n`;
+    css += `.job-row.s-${key}{ border-left-color:${p.bar}; }\n`;
+  }
+  let el = document.getElementById('dynamic-status-css');
+  if(!el){ el=document.createElement('style'); el.id='dynamic-status-css'; document.head.appendChild(el); }
+  el.textContent = css;
 }
+
+applyStatusColors();
+
+// Badge label = raw sheet text; class = sb-{bucket}
+function statusBadge(rawStatus){
+  const bucket = fuzzyBucket(rawStatus);
+  return ['sb-'+bucket, rawStatus||'Scheduled'];
+}
+
+// ── SETTINGS UI ──────────────────────────────────────────────────────────────
+// Called after tracker loads so we know the real status labels
+let knownStatuses = {}; // bucket → raw label (first seen)
+
+function registerStatus(rawStatus){
+  const bucket = fuzzyBucket(rawStatus);
+  if(!knownStatuses[bucket]) knownStatuses[bucket] = rawStatus;
+}
+
+function buildSettingsUI(){
+  const rows = document.getElementById('settings-rows');
+  if(!rows) return;
+  const order = ['scheduled','build','rtc','complete','tentative','hold'];
+  const labels = { scheduled:'Scheduled', build:'In Build', rtc:'Ready to Cut', complete:'Complete', tentative:'Tentative', hold:'On Hold' };
+  rows.innerHTML = '';
+  for(const bucket of order){
+    const label = knownStatuses[bucket] || labels[bucket];
+    const row = document.createElement('div');
+    row.className = 'setting-row';
+    row.innerHTML = `<div class="setting-label">${esc(label)}</div><div class="setting-swatches" data-bucket="${bucket}"></div>`;
+    const swatchWrap = row.querySelector('.setting-swatches');
+    for(const [colorName, hex] of Object.entries(SWATCH_HEX)){
+      const sw = document.createElement('div');
+      sw.className = 'swatch' + (statusColors[bucket]===colorName?' active':'');
+      sw.style.background = hex;
+      sw.title = colorName;
+      sw.addEventListener('click', ()=>{
+        statusColors[bucket] = colorName;
+        saveColors();
+        applyStatusColors();
+        // update active state
+        swatchWrap.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+        sw.classList.add('active');
+      });
+      swatchWrap.appendChild(sw);
+    }
+    rows.appendChild(row);
+  }
+}
+
+document.getElementById('settings-btn').addEventListener('click', e=>{
+  e.stopPropagation();
+  document.getElementById('settings-drawer').classList.toggle('open');
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#settings-drawer')&&!e.target.closest('#settings-btn')){
+    document.getElementById('settings-drawer').classList.remove('open');
+  }
+});
 
 function asmStatus(job){
   if(job.pct>=100) return 'complete';
@@ -620,7 +751,8 @@ function renderTracker(jobs){
   if(!hero){
     document.getElementById('hero').innerHTML='<div style="padding:16px;color:var(--muted);font-size:13px;">No upcoming jobs</div>';
   } else {
-    const status=fuzzyStatus(hero['Status']);
+    registerStatus(hero['Status']);
+    const status=fuzzyBucket(hero['Status']);
     const [bCls,bTxt]=statusBadge(hero['Status']);
     const contractor=(hero['Contractor']||'').trim();
     const installDate=parseDate(hero['Install Date']);
@@ -662,7 +794,8 @@ function renderTracker(jobs){
   let h='';
   for(const job of listJobs){
     if(job===hero) continue; // skip — already shown in hero
-    const status=fuzzyStatus(job['Status']);
+    registerStatus(job['Status']);
+    const status=fuzzyBucket(job['Status']);
     const [bCls,bTxt]=statusBadge(job['Status']);
     const contractor=(job['Contractor']||'').trim();
     const notes=(job['Notes']||'').trim();
@@ -689,6 +822,7 @@ function renderTracker(jobs){
   }
 
   document.getElementById('jobs-list').innerHTML = h || '<div style="padding:16px;color:var(--muted);font-size:13px;">All jobs shown above</div>';
+  buildSettingsUI();
 }
 
 // ── RENDER RIGHT ──────────────────────────────────────────────────────────────
