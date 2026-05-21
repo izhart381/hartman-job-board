@@ -744,7 +744,7 @@ function renderTracker(jobs){
   });
 
   // Hero = first non-complete job (soonest install date)
-  const active=sorted.filter(j=>fuzzyStatus(j['Status'])!=='complete');
+  const active=sorted.filter(j=>fuzzyBucket(j['Status'])!=='complete');
   const hero=active[0]||sorted[0]||null;
 
   // ── HERO ──
