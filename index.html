@@ -25,6 +25,8 @@
     --bdim:    rgba(37,99,235,0.10);
     --purple:  #7c3aed;
     --pdim:    rgba(124,58,237,0.10);
+    --orange:  #ea580c;
+    --odim:    rgba(234,88,12,0.10);
     --rdim:    rgba(204,34,0,0.08);
     --fh:      'Barlow Condensed', sans-serif;
     --fb:      'Barlow', sans-serif;
@@ -208,6 +210,7 @@
   .job-row.s-complete  { border-left-color: var(--green); }
   .job-row.s-tentative { border-left-color: var(--purple); }
   .job-row.s-hold      { border-left-color: var(--muted2); }
+  .job-row.s-rtc       { border-left-color: var(--orange); }
 
   .jr-name {
     font-family: var(--fh); font-size: 17px; font-weight: 800;
@@ -243,6 +246,7 @@
   .sb-complete  { background: var(--gdim);  color: var(--green);  border: 1px solid rgba(22,163,74,.2); }
   .sb-tentative { background: var(--pdim);  color: var(--purple); border: 1px solid rgba(124,58,237,.2); }
   .sb-hold      { background: rgba(0,0,0,.04); color: var(--muted); border: 1px solid var(--border2); }
+  .sb-rtc       { background: var(--odim);  color: var(--orange); border: 1px solid rgba(234,88,12,.2); }
 
   /* ── RIGHT COLUMN — ASSEMBLY ── */
   .col-right {
@@ -390,7 +394,8 @@
     <div class="topbar-logo">
       <img src="https://izhart381.github.io/hartman-job-board/hartman-logo.png"
            alt="Hartman Cabinetry"
-           onerror="this.style.display='none'">
+           onerror="this.style.display='none'; document.getElementById('logo-text').style.display='block'">
+      <div id="logo-text" style="display:none; font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:#fff;">Hartman Cabinetry</div>
     </div>
     <div class="topbar-center">Job &amp; Assembly Board</div>
     <div class="topbar-right">
@@ -550,29 +555,33 @@ function parseAssembly(text){
 }
 
 // ── STATUS ────────────────────────────────────────────────────────────────────
+// Returns a CSS color-class based on the status value, but the label always
+// shows whatever is literally in the sheet dropdown.
 function fuzzyStatus(s){
   const v=(s||'').toLowerCase().replace(/[^a-z]/g,'');
-  // Complete / done
-  if(/comp|done|finish|delivr/.test(v))         return 'complete';
-  // In Build / In Progress / Production / Cutting / Assembly
-  if(/build|progress|prod|cut|assembl|active|inprog/.test(v)) return 'build';
-  // Tentative / Pending / Waiting / Quote
-  if(/tent|pend|wait|quot/.test(v))             return 'tentative';
-  // On Hold / Paused / Delayed / Cancelled
-  if(/hold|paus|delay|cancel/.test(v))          return 'hold';
-  // Scheduled / Confirmed / Approved / Upcoming
-  if(/sched|confirm|approv|upcom/.test(v))      return 'scheduled';
-  // Fallback: if there's any text at all, show as scheduled
-  return v.length>0 ? 'scheduled' : 'scheduled';
+  if(/comp|done|finish|delivr/.test(v))               return 'complete';
+  if(/readytocut|readycut|rtc|ready/.test(v))         return 'rtc';
+  if(/build|progress|prod|assembl|active/.test(v))    return 'build';
+  if(/tent|pend|wait|quot/.test(v))                   return 'tentative';
+  if(/hold|paus|delay|cancel/.test(v))                return 'hold';
+  return 'scheduled';
 }
 
-const BADGE={
-  scheduled:['sb-scheduled','Scheduled'],
-  build:    ['sb-build','In Build'],
-  complete: ['sb-complete','Complete'],
-  tentative:['sb-tentative','Tentative'],
-  hold:     ['sb-hold','On Hold'],
+// Badge class only — label comes straight from the sheet
+const BADGE_CLASS={
+  scheduled:'sb-scheduled',
+  build:    'sb-build',
+  complete: 'sb-complete',
+  tentative:'sb-tentative',
+  hold:     'sb-hold',
+  rtc:      'sb-rtc',
 };
+
+// Returns [cssClass, labelText] — label is raw sheet value
+function statusBadge(rawStatus){
+  const cls = BADGE_CLASS[fuzzyStatus(rawStatus)] || 'sb-scheduled';
+  return [cls, rawStatus || 'Scheduled'];
+}
 
 function asmStatus(job){
   if(job.pct>=100) return 'complete';
@@ -612,7 +621,7 @@ function renderTracker(jobs){
     document.getElementById('hero').innerHTML='<div style="padding:16px;color:var(--muted);font-size:13px;">No upcoming jobs</div>';
   } else {
     const status=fuzzyStatus(hero['Status']);
-    const [bCls,bTxt]=BADGE[status]||BADGE.scheduled;
+    const [bCls,bTxt]=statusBadge(hero['Status']);
     const contractor=(hero['Contractor']||'').trim();
     const installDate=parseDate(hero['Install Date']);
     const notes=(hero['Notes']||'').trim();
@@ -654,7 +663,7 @@ function renderTracker(jobs){
   for(const job of listJobs){
     if(job===hero) continue; // skip — already shown in hero
     const status=fuzzyStatus(job['Status']);
-    const [bCls,bTxt]=BADGE[status]||BADGE.scheduled;
+    const [bCls,bTxt]=statusBadge(job['Status']);
     const contractor=(job['Contractor']||'').trim();
     const notes=(job['Notes']||'').trim();
     const installDate=parseDate(job['Install Date']);
